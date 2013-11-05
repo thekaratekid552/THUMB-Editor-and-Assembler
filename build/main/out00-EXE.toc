@@ -1,0 +1,9 @@
+('Z:\\home\\roger\\Documents\\python\\asm\\dist\\main.exe',
+ False,
+ False,
+ None,
+ None,
+ [],
+ None,
+ False,
+ 1383673363L)
