@@ -1,6 +1,7 @@
 #http://my-python3-code.blogspot.com/2012/08/basic-tkinter-text-editor-online-example.html
 import tkFileDialog
 from Tkinter import *
+import Tkinter as tk
 import os.path
 import sys
 import subprocess
@@ -15,6 +16,64 @@ def module_path():
     if we_are_frozen():
         return os.path.dirname(unicode(sys.executable, encoding))
     return os.path.dirname(unicode(__file__, encoding))
+
+class CustomText(tk.Text):
+    def __init__(self, *args, **kwargs):
+        tk.Text.__init__(self, *args, **kwargs)
+
+        self.tk.eval('''
+            proc widget_proxy {widget widget_command args} {
+
+                # call the real tk widget command with the real args
+                set result [uplevel [linsert $args 0 $widget_command]]
+
+                # generate the event for certain types of commands
+                if {([lindex $args 0] in {insert replace delete}) ||
+                    ([lrange $args 0 2] == {mark set insert}) || 
+                    ([lrange $args 0 1] == {xview moveto}) ||
+                    ([lrange $args 0 1] == {xview scroll}) ||
+                    ([lrange $args 0 1] == {yview moveto}) ||
+                    ([lrange $args 0 1] == {yview scroll})} {
+
+                    event generate  $widget <<Change>> -when tail
+                }
+
+                # return the result from the real widget command
+                return $result
+            }
+            ''')
+        self.tk.eval('''
+            rename {widget} _{widget}
+            interp alias {{}} ::{widget} {{}} widget_proxy {widget} _{widget}
+        '''.format(widget=str(self)))
+
+class TextLineNumbers(tk.Canvas):
+    def __init__(self, *args, **kwargs):
+        tk.Canvas.__init__(self, *args, **kwargs)
+        self.textwidget = None
+
+    def attach(self, text_widget):
+        self.textwidget = text_widget
+
+    def redraw(self, *args):
+        '''redraw line numbers'''
+        self.delete("all")
+
+        i = self.textwidget.index("@0,0")
+        
+        
+        while True :
+            dline= self.textwidget.dlineinfo(i)
+            if dline is None: break
+            y = dline[1]
+            linenum = str(i).split(".")[0]
+            self.create_text(2,y,anchor="nw", text=linenum)
+            i = self.textwidget.index("%s+1line" % i)
+            p = float(i)-1.0
+            self.config(width=10*(len(str(p))-2))
+            
+        
+
 
 class App:
 #File Menu Functions:
@@ -384,7 +443,8 @@ is completely open-source. Feel free to modify, but please give credit. Enjoy!",
         
         msg2 = Message(about, text="Credits:\n-HackMew for his thumb.bat file \
 which the compiling feature is based upon.\n-What is Second Life ? for posting the very simple text editor, \
-that became the basis of this program, on his blog.", width=400, pady=5)
+that became the basis of this program, on his blog.\n-Bryan Oakley for his extremely detailed example of how \
+to add line numbers and whose code I merged with mine.", width=400, pady=5)
         msg2.pack()
         
         button = Button(about, text="Close", pady=5, command=info.destroy, width=12)
@@ -392,50 +452,65 @@ that became the basis of this program, on his blog.", width=400, pady=5)
 
 #------------------------------------------------------------------------------
     def __init__(self):
-            # Set up the screen, the title, and the size.
-            self.root = Tk()
-            self.root.title("THUMB Editor")
-            self.root.minsize(width=500,height=400)
-            self.path = module_path()
-                   
-            # Set up basic Menu
-            menubar = Menu(self.root)
-   
-            # Set up a separate menu that is a child of the main menu
-            filemenu = Menu(menubar,tearoff=0)
-            filemenu.add_command(label="New File", command=self.doNew, accelerator="Ctrl+N")
-            
-            #create an options menu:
-            option_menu = Menu(menubar,tearoff=0)
-            option_menu.add_command(label="Preferences", command=self.doPreferences)
-            
-            #Create a menu for compiling.
-            compile_menu = Menu(menubar,tearoff=0)
-            compile_menu.add_command(label="Test Compile", command=self.doTestCompile, accelerator="Ctrl+Shift+P")
-            compile_menu.add_command(label="Output to .bin", command=self.doBinCompile, accelerator="Ctrl+P")
-            compile_menu.add_command(label="Insert into Rom", command=self.doRomInsert, accelerator="Ctrl+U")
-            compile_menu.add_command(label="Insert into Rom via .org", command=self.doRomInsertOrg, accelerator="Ctrl+Shift+U")
-            
-            #Create a help menu:
-            help_menu = Menu(menubar,tearoff=0)
-            help_menu.add_command(label="About", command=self.do_about)
-   
-            # Try out openDialog
-            filemenu.add_command(label="Open", command=self.doOpen, accelerator="Ctrl+O")
-   
-            # Try out the saveAsDialog
-            filemenu.add_command(label="Save", command=self.doSaveAs, accelerator="Ctrl+Shift+S")
-            
-            
-            menubar.add_cascade(label="File", menu=filemenu)
-            menubar.add_cascade(label="Options", menu=option_menu)
-            menubar.add_cascade(label="Compile", menu=compile_menu)
-            menubar.add_cascade(label="Help", menu=help_menu)
-            self.root.config(menu=menubar)
-   
-            # Set up the text widget
-            self.text = Text(self.root)
-            self.text.pack(expand=YES, fill=BOTH) # Expand to fit vertically and horizontally
+        # Set up the screen, the title, and the size.
+        self.root = Tk()
+        self.root.title("THUMB Editor")
+        self.root.minsize(width=500,height=400)
+        self.path = module_path()
+               
+        # Set up basic Menu
+        menubar = Menu(self.root)
+
+        # Set up a separate menu that is a child of the main menu
+        filemenu = Menu(menubar,tearoff=0)
+        filemenu.add_command(label="New File", command=self.doNew, accelerator="Ctrl+N")
+        
+        #create an options menu:
+        option_menu = Menu(menubar,tearoff=0)
+        option_menu.add_command(label="Preferences", command=self.doPreferences)
+        
+        #Create a menu for compiling.
+        compile_menu = Menu(menubar,tearoff=0)
+        compile_menu.add_command(label="Test Compile", command=self.doTestCompile, accelerator="Ctrl+Shift+P")
+        compile_menu.add_command(label="Output to .bin", command=self.doBinCompile, accelerator="Ctrl+P")
+        compile_menu.add_command(label="Insert into Rom", command=self.doRomInsert, accelerator="Ctrl+U")
+        compile_menu.add_command(label="Insert into Rom via .org", command=self.doRomInsertOrg, accelerator="Ctrl+Shift+U")
+        
+        #Create a help menu:
+        help_menu = Menu(menubar,tearoff=0)
+        help_menu.add_command(label="About", command=self.do_about)
+
+        # Try out openDialog
+        filemenu.add_command(label="Open", command=self.doOpen, accelerator="Ctrl+O")
+
+        # Try out the saveAsDialog
+        filemenu.add_command(label="Save", command=self.doSaveAs, accelerator="Ctrl+Shift+S")
+        
+        
+        menubar.add_cascade(label="File", menu=filemenu)
+        menubar.add_cascade(label="Options", menu=option_menu)
+        menubar.add_cascade(label="Compile", menu=compile_menu)
+        menubar.add_cascade(label="Help", menu=help_menu)
+        self.root.config(menu=menubar)
+
+        # Set up the text widget
+        self.text = CustomText(self.root)
+        self.vsb = tk.Scrollbar(orient="vertical", command=self.text.yview)
+        self.text.configure(yscrollcommand=self.vsb.set)
+        self.linenumbers = TextLineNumbers(self.root, width=10)
+        self.linenumbers.attach(self.text)
+
+        self.vsb.pack(side="right", fill="y")
+        self.linenumbers.pack(side="left", fill="y")
+        self.text.pack(side="right", fill="both", expand=True)
+
+        self.text.bind("<<Change>>", self._on_change)
+        self.text.bind("<Configure>", self._on_change)
+
+    def _on_change(self, event):
+        self.linenumbers.redraw()
+    def _on_change(self, event):
+        self.linenumbers.redraw()
 
 app = App()
 app.root.mainloop()
