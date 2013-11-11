@@ -78,11 +78,11 @@ class TextLineNumbers(tk.Canvas):
 class App:
 #File Menu Functions:
 #----------------------------------------------------------------------
-    def doNew(self):
+    def doNew(self, w):
             # Clear the text
             self.text.delete(0.0, END)
 
-    def doSaveAs(self):
+    def doSaveAs(self, w):
             # Returns the saved file
             file = tkFileDialog.asksaveasfile(mode='w', defaultextension=".asm")
             if file == None:
@@ -91,7 +91,7 @@ class App:
             file.write(textoutput.rstrip()) # With blank perameters, this cuts off all whitespace after a line.
             file.write("\n") # Then we add a newline character.
 
-    def doOpen(self):
+    def doOpen(self, w):
             # Returns the opened file
             file = tkFileDialog.askopenfile(mode='r')
             if file == None:
@@ -194,7 +194,7 @@ class App:
         self.prompt.destroy()
         self.ROM.close()
         
-    def doRomInsert(self):
+    def doRomInsert(self, w):
         self.binary = os.path.join(self.path, "temp.bin")
         error = self.createBinary("temp.asm", self.binary)
         if error:
@@ -227,7 +227,7 @@ class App:
 
         
 
-    def doTestCompile(self):
+    def doTestCompile(self, w):
         binary = os.path.join(self.path, "temp.bin")
         error = self.createBinary("temp.asm", binary)
         if not error:
@@ -240,7 +240,7 @@ class App:
             
         
         
-    def doBinCompile(self):
+    def doBinCompile(self, w):
         open_file = tkFileDialog.asksaveasfile(mode='w', defaultextension=".bin", title="Compile Binary as...")
         #os.chdir(self.path)
         if open_file == None:
@@ -295,7 +295,7 @@ class App:
         os.remove("a.out")
         return False
         
-    def doRomInsertOrg(self):
+    def doRomInsertOrg(self, w):
         info = Toplevel()
         info.title(".org Info")
         
@@ -428,6 +428,16 @@ prompt exactly matches the .org offset, or there will be issues.", width=400, pa
         self.preferences.deiconify()
         
 
+#Edit Menu Functions:
+#----------------------------------------------------------------------
+    def selectall(self, w):
+        self.text.tag_add(SEL, "1.0", END)
+        self.text.mark_set(INSERT, "1.0")
+        self.text.see(INSERT)
+        return 'break'
+
+
+
 
 #Help Menu Functions:
 #----------------------------------------------------------------------
@@ -463,7 +473,10 @@ to add line numbers and whose code I merged with mine.", width=400, pady=5)
 
         # Set up a separate menu that is a child of the main menu
         filemenu = Menu(menubar,tearoff=0)
-        filemenu.add_command(label="New File", command=self.doNew, accelerator="Ctrl+N")
+        filemenu.add_command(label="New File", command=self.doNew, accelerator="Ctrl+n")
+        
+        edit_menu = Menu(menubar, tearoff=0)
+        edit_menu.add_command(label="Select All", command=self.selectall, accelerator="Ctrl+a")
         
         #create an options menu:
         option_menu = Menu(menubar,tearoff=0)
@@ -471,23 +484,25 @@ to add line numbers and whose code I merged with mine.", width=400, pady=5)
         
         #Create a menu for compiling.
         compile_menu = Menu(menubar,tearoff=0)
-        compile_menu.add_command(label="Test Compile", command=self.doTestCompile, accelerator="Ctrl+Shift+P")
-        compile_menu.add_command(label="Output to .bin", command=self.doBinCompile, accelerator="Ctrl+P")
-        compile_menu.add_command(label="Insert into Rom", command=self.doRomInsert, accelerator="Ctrl+U")
-        compile_menu.add_command(label="Insert into Rom via .org", command=self.doRomInsertOrg, accelerator="Ctrl+Shift+U")
+        compile_menu.add_command(label="Test Compile", command=self.doTestCompile, accelerator="Ctrl+Shift+p")
+        compile_menu.add_command(label="Output to .bin", command=self.doBinCompile, accelerator="Ctrl+p")
+        compile_menu.add_command(label="Insert into Rom", command=self.doRomInsert, accelerator="Ctrl+u")
+        compile_menu.add_command(label="Insert into Rom via .org", command=self.doRomInsertOrg, accelerator="Ctrl+Shift+u")
         
         #Create a help menu:
         help_menu = Menu(menubar,tearoff=0)
         help_menu.add_command(label="About", command=self.do_about)
 
         # Try out openDialog
-        filemenu.add_command(label="Open", command=self.doOpen, accelerator="Ctrl+O")
+        filemenu.add_command(label="Open", command=self.doOpen, accelerator="Ctrl+o")
 
         # Try out the saveAsDialog
-        filemenu.add_command(label="Save", command=self.doSaveAs, accelerator="Ctrl+Shift+S")
+        filemenu.add_command(label="Save", command=self.doSaveAs, accelerator="Ctrl+Shift+s")
         
         
         menubar.add_cascade(label="File", menu=filemenu)
+        menubar.add_cascade(label="Edit", menu=edit_menu)
+        
         menubar.add_cascade(label="Options", menu=option_menu)
         menubar.add_cascade(label="Compile", menu=compile_menu)
         menubar.add_cascade(label="Help", menu=help_menu)
@@ -506,6 +521,16 @@ to add line numbers and whose code I merged with mine.", width=400, pady=5)
 
         self.text.bind("<<Change>>", self._on_change)
         self.text.bind("<Configure>", self._on_change)
+        self.text.bind("<Control-Key-n>", self.doNew)
+        self.text.bind("<Control-Key-a>", self.selectall)
+        self.text.bind("<Control-Key-P>", self.doTestCompile)
+        self.text.bind("<Control-Key-p>", self.doBinCompile)
+        self.text.bind("<Control-Key-u>", self.doRomInsert)
+        self.text.bind("<Control-Key-U>", self.doRomInsertOrg)
+        self.text.bind("<Control-Key-o>", self.doOpen)
+        self.text.bind("<Control-Key-S>", self.doSaveAs)
+        
+        
 
     def _on_change(self, event):
         self.linenumbers.redraw()
