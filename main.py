@@ -78,11 +78,11 @@ class TextLineNumbers(tk.Canvas):
 class App:
 #File Menu Functions:
 #----------------------------------------------------------------------
-    def doNew(self, w):
+    def doNew(self, *args):
             # Clear the text
             self.text.delete(0.0, END)
 
-    def doSaveAs(self, w):
+    def doSaveAs(self, *args):
             # Returns the saved file
             file = tkFileDialog.asksaveasfile(mode='w', defaultextension=".asm")
             if file == None:
@@ -91,7 +91,7 @@ class App:
             file.write(textoutput.rstrip()) # With blank perameters, this cuts off all whitespace after a line.
             file.write("\n") # Then we add a newline character.
 
-    def doOpen(self, w):
+    def doOpen(self, *args):
             # Returns the opened file
             file = tkFileDialog.askopenfile(mode='r')
             if file == None:
@@ -194,7 +194,7 @@ class App:
         self.prompt.destroy()
         self.ROM.close()
         
-    def doRomInsert(self, w):
+    def doRomInsert(self, *args):
         self.binary = os.path.join(self.path, "temp.bin")
         error = self.createBinary("temp.asm", self.binary)
         if error:
@@ -227,7 +227,7 @@ class App:
 
         
 
-    def doTestCompile(self, w):
+    def doTestCompile(self, *args):
         binary = os.path.join(self.path, "temp.bin")
         error = self.createBinary("temp.asm", binary)
         if not error:
@@ -240,7 +240,7 @@ class App:
             
         
         
-    def doBinCompile(self, w):
+    def doBinCompile(self, *args):
         open_file = tkFileDialog.asksaveasfile(mode='w', defaultextension=".bin", title="Compile Binary as...")
         #os.chdir(self.path)
         if open_file == None:
@@ -295,7 +295,7 @@ class App:
         os.remove("a.out")
         return False
         
-    def doRomInsertOrg(self, w):
+    def doRomInsertOrg(self, *args):
         info = Toplevel()
         info.title(".org Info")
         
@@ -430,7 +430,7 @@ prompt exactly matches the .org offset, or there will be issues.", width=400, pa
 
 #Edit Menu Functions:
 #----------------------------------------------------------------------
-    def selectall(self, w):
+    def selectall(self, *args):
         self.text.tag_add(SEL, "1.0", END)
         self.text.mark_set(INSERT, "1.0")
         self.text.see(INSERT)
@@ -457,7 +457,7 @@ that became the basis of this program, on his blog.\n-Bryan Oakley for his extre
 to add line numbers and whose code I merged with mine.", width=400, pady=5)
         msg2.pack()
         
-        button = Button(about, text="Close", pady=5, command=info.destroy, width=12)
+        button = Button(about, text="Close", pady=5, command=about.destroy, width=12)
         button.pack()
 
 #------------------------------------------------------------------------------
@@ -475,8 +475,14 @@ to add line numbers and whose code I merged with mine.", width=400, pady=5)
         filemenu = Menu(menubar,tearoff=0)
         filemenu.add_command(label="New File", command=self.doNew, accelerator="Ctrl+n")
         
+        #set up an Edit Menu
         edit_menu = Menu(menubar, tearoff=0)
+        edit_menu.add_command(label="Cut", accelerator="Ctrl+x", command=lambda: self.text.event_generate('<Control-x>'))
+        edit_menu.add_command(label="Copy", accelerator="Ctrl+c", command=lambda: self.text.event_generate('<Control-c>'))
+        edit_menu.add_command(label="Paste", accelerator="Ctrl+v", command=lambda: self.text.event_generate('<Control-v>'))
         edit_menu.add_command(label="Select All", command=self.selectall, accelerator="Ctrl+a")
+        
+        
         
         #create an options menu:
         option_menu = Menu(menubar,tearoff=0)
