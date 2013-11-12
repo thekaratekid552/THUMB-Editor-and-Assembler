@@ -18,9 +18,10 @@ def module_path():
     return os.path.dirname(unicode(__file__, encoding))
 
 class CustomText(tk.Text):
+    
     def __init__(self, *args, **kwargs):
         tk.Text.__init__(self, *args, **kwargs)
-
+        self.highlight = True
         self.tk.eval('''
             proc widget_proxy {widget widget_command args} {
 
@@ -46,6 +47,40 @@ class CustomText(tk.Text):
             rename {widget} _{widget}
             interp alias {{}} ::{widget} {{}} widget_proxy {widget} _{widget}
         '''.format(widget=str(self)))
+        
+    def highlighting(self, *args):
+        if not self.highlight: return
+        #DEBUGGER COLORS
+        self.label_color = "#ff0000"
+        
+        
+        
+        
+        
+        #Highlight LABELS
+        self.tag_configure("LABEL",foreground=self.label_color)
+        self.highlight_pattern("\b*:\b", "LABEL")
+        
+    def highlight_pattern(self, pattern, tag, start="1.0", end="end", regexp=True):
+        """Apply the given tag to all text that matches the given pattern
+
+        If 'regexp' is set to True, pattern will be treated as a regular expression
+        """
+
+        start = self.index(start)
+        end = self.index(end)
+        self.mark_set("matchStart",start)
+        self.mark_set("matchEnd",start)
+        self.mark_set("searchLimit", end)
+
+        count = tk.IntVar()
+        while True:
+            index = self.search(pattern, "matchEnd","searchLimit",
+                                count=count, regexp=regexp)
+            if index == "": break
+            self.mark_set("matchStart", index)
+            self.mark_set("matchEnd", "%s+%sc" % (index,count.get()))
+            self.tag_add(tag, "matchStart","matchEnd")
 
 class TextLineNumbers(tk.Canvas):
     def __init__(self, *args, **kwargs):
@@ -540,8 +575,8 @@ to add line numbers and whose code I merged with mine.", width=400, pady=5)
 
     def _on_change(self, event):
         self.linenumbers.redraw()
-    def _on_change(self, event):
-        self.linenumbers.redraw()
+        self.text.highlighting()
+
 
 app = App()
 app.root.mainloop()
