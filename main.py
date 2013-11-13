@@ -54,13 +54,17 @@ class CustomText(tk.Text):
         #DEBUGGER COLORS
         self.label_color = "#ff0000"
         
-        
-        
-        
+        #Clear previous highlighting
+        options = self.config()
+        print options
+        reset_color = options['foreground']
+        reset_color = reset_color[4]
+        self.tag_configure("RESET",foreground=reset_color)
+        self.tag_add("RESET", "1.0",END)
         
         #Highlight LABELS
         self.tag_configure("LABEL",foreground=self.label_color)
-        self.highlight_pattern('\b....', "LABEL")
+        self.highlight_pattern('_:', "LABEL")
         
     def highlight_pattern(self, pattern, tag, start="1.0", end="end", regexp=True):
         """Apply the given tag to all text that matches the given pattern
