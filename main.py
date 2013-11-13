@@ -6,6 +6,7 @@ import os.path
 import sys
 import subprocess
 from tkColorChooser import askcolor
+import re
 
 def we_are_frozen():
     # All of the modules are built-in to the interpreter, e.g., by py2exe
@@ -59,14 +60,13 @@ class CustomText(tk.Text):
         
         #Highlight LABELS
         self.tag_configure("LABEL",foreground=self.label_color)
-        self.highlight_pattern("\b*:\b", "LABEL")
+        self.highlight_pattern('\b....', "LABEL")
         
     def highlight_pattern(self, pattern, tag, start="1.0", end="end", regexp=True):
         """Apply the given tag to all text that matches the given pattern
 
         If 'regexp' is set to True, pattern will be treated as a regular expression
         """
-
         start = self.index(start)
         end = self.index(end)
         self.mark_set("matchStart",start)
