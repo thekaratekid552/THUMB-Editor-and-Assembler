@@ -47,20 +47,33 @@ class CustomText(tk.Text):
             rename {widget} _{widget}
             interp alias {{}} ::{widget} {{}} widget_proxy {widget} _{widget}
         '''.format(widget=str(self)))
-        
+        self.flag = False
     def highlighting(self, *args):
         if not self.highlight: return
         #DEBUGGER COLORS
         self.label_color = "#ff0000"
+        self.large_color = "#00ff00"
+        self.comment_color = "#0000ff"
         
         
+        if self.flag: self.tag_delete("COMMENT","LABEL","LARGE")
         
+        #Highlight Comments
+        self.tag_configure("COMMENT",foreground=self.comment_color)
+        self.highlight_pattern(r"(?w)/\*.*\*/", "COMMENT")
         
         
         #Highlight LABELS
         self.tag_configure("LABEL",foreground=self.label_color)
-        self.highlight_pattern("\m*\u003A\M", "LABEL")
+        self.highlight_pattern(r".*:", "LABEL")
+        self.tag_lower("LABEL", belowThis="COMMENT")
         
+        #Highlight large numbers
+        self.tag_configure("LARGE",foreground=self.large_color)
+        self.highlight_pattern(r"\..*\y", "LARGE")
+        self.tag_lower("LARGE", belowThis="COMMENT")
+        
+        self.flag = True
     def highlight_pattern(self, pattern, tag, start="1.0", end="end", regexp=True):
         """Apply the given tag to all text that matches the given pattern
 
