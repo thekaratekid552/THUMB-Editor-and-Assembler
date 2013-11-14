@@ -22,6 +22,7 @@ class CustomText(tk.Text):
     def __init__(self, *args, **kwargs):
         tk.Text.__init__(self, *args, **kwargs)
         self.highlight = True
+        self.config(undo = True)
         self.tk.eval('''
             proc widget_proxy {widget widget_command args} {
 
@@ -48,13 +49,34 @@ class CustomText(tk.Text):
             interp alias {{}} ::{widget} {{}} widget_proxy {widget} _{widget}
         '''.format(widget=str(self)))
         self.flag = False
+    def edit_redo(self, *args):
+        """Redo the last undone edit
+
+        When the undo option is true, reapplies the last
+        undone edits provided no other edits were done since
+        then. Generates an error when the redo stack is empty.
+        Does nothing when the undo option is false.
+        """
+        return self.edit("redo")
+        
+    def edit_undo(self, *args):
+        """Undoes the last edit action
+
+        If the undo option is true. An edit action is defined
+        as all the insert and delete commands that are recorded
+        on the undo stack in between two separators. Generates
+        an error when the undo stack is empty. Does nothing
+        when the undo option is false
+        """
+        return self.edit("undo")
+        
     def highlighting(self, *args):
         if not self.highlight: return
         #DEBUGGER COLORS
         self.label_color = "#ff0000"
         self.large_color = "#00ff00"
         self.comment_color = "#0000ff"
-        
+        self.labels = []
         
         if self.flag: self.tag_delete("COMMENT","LABEL","LARGE")
         
@@ -65,13 +87,16 @@ class CustomText(tk.Text):
         
         #Highlight LABELS
         self.tag_configure("LABEL",foreground=self.label_color)
-        self.highlight_pattern(r".*:", "LABEL")
+        self.highlight_pattern(r"\m[^. ]*:", "LABEL")
         self.tag_lower("LABEL", belowThis="COMMENT")
         
         #Highlight large numbers
         self.tag_configure("LARGE",foreground=self.large_color)
-        self.highlight_pattern(r"\..*\y", "LARGE")
+        self.highlight_pattern(r"\.[^ ]*\y", "LARGE")
         self.tag_lower("LARGE", belowThis="COMMENT")
+        
+        #highlight all labels elsewhere
+        for label in self.labels: self.highlight_sub_pattern(label, "LABEL")
         
         self.flag = True
     def highlight_pattern(self, pattern, tag, start="1.0", end="end", regexp=True):
@@ -91,10 +116,38 @@ class CustomText(tk.Text):
             index = self.search(pattern, "matchEnd","searchLimit",
                                 count=count, regexp=regexp)
             if index == "": break
+            
+            
             self.mark_set("matchStart", index)
             self.mark_set("matchEnd", "%s+%sc" % (index,count.get()))
+            text = self.get("matchStart","matchEnd")
+            #text for words which shouldn't be marked:
+            if text[:5] == ".word": continue
+            if text[:6] == ".align": continue
+            if text[:6] == ".thumb": continue
+            if text[:5] == ".org": continue
+            if tag == "LABEL":
+                print index
+                print text[0:-1]
+                self.labels.append(text[0:-1])
             self.tag_add(tag, "matchStart","matchEnd")
+            
+    def highlight_sub_pattern(self, pattern, tag, start="1.0", end="end", regexp=False):
+        _start = self.index(start)
+        _end = self.index(end)
+        self.mark_set("matchStart",_start)
+        self.mark_set("matchEnd",_start)
+        self.mark_set("searchLimit", _end)
 
+        _count = tk.IntVar()
+        while True:
+            _index = self.search(pattern, "matchEnd","searchLimit",
+                                count=_count, regexp=regexp)
+            if _index == "": break
+            self.mark_set("matchStart", _index)
+            self.mark_set("matchEnd", "%s+%sc" % (_index,_count.get()))
+            self.tag_add(tag, "matchStart","matchEnd")
+        
 class TextLineNumbers(tk.Canvas):
     def __init__(self, *args, **kwargs):
         tk.Canvas.__init__(self, *args, **kwargs)
@@ -583,9 +636,12 @@ to add line numbers and whose code I merged with mine.", width=400, pady=5)
         self.text.bind("<Control-Key-U>", self.doRomInsertOrg)
         self.text.bind("<Control-Key-o>", self.doOpen)
         self.text.bind("<Control-Key-S>", self.doSaveAs)
+        self.text.bind("<Control-Key-z>", self.text.edit_undo)
+        self.text.bind("<Control-Key-y>", self.text.edit_redo)
         
+        edit_menu.add_command(label="Undo", command=self.text.edit_undo, accelerator="Ctrl+z")
+        edit_menu.add_command(label="Redo", command=self.text.edit_redo, accelerator="Ctrl+y")
         
-
     def _on_change(self, event):
         self.linenumbers.redraw()
         self.text.highlighting()
