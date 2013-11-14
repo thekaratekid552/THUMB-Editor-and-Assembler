@@ -48,6 +48,11 @@ class CustomText(tk.Text):
             rename {widget} _{widget}
             interp alias {{}} ::{widget} {{}} widget_proxy {widget} _{widget}
         '''.format(widget=str(self)))
+        
+        self.label_color = "#ff0000"
+        self.large_color = "#00ff00"
+        self.comment_color = "#0000ff"
+        
         self.flag = False
     def edit_redo(self, *args):
         """Redo the last undone edit
@@ -73,9 +78,9 @@ class CustomText(tk.Text):
     def highlighting(self, *args):
         if not self.highlight: return
         #DEBUGGER COLORS
-        self.label_color = "#ff0000"
-        self.large_color = "#00ff00"
-        self.comment_color = "#0000ff"
+        #self.label_color = "#ff0000"
+        #self.large_color = "#00ff00"
+        #self.comment_color = "#0000ff"
         self.labels = []
         
         if self.flag: self.tag_delete("COMMENT","LABEL","LARGE")
@@ -518,7 +523,7 @@ prompt exactly matches the .org offset, or there will be issues.", width=400, pa
         bg_button.grid(row=1, column=1, pady=5, padx=5)
         
         highlight_message = Message(self.preferences, text="-Syntax Highlighting-", width=200)
-        highlight_message.grid(row=1, column=1, pady=5, padx=5)
+        highlight_message.grid(row=1, column=1, columnspan = 2, pady=5, padx=5)
         
         label_msg = Message(self.preferences, text="Label Color", width=100)
         label_msg.grid(row=3, column=0, pady=5)
@@ -536,7 +541,10 @@ prompt exactly matches the .org offset, or there will be issues.", width=400, pa
         self.text.config(bg=color[1])
         self.preferences.deiconify()
         
-    def edit_labels
+    def edit_labels(self):
+    	color = askcolor()
+    	self.text.label_color = color[1]
+    	self.preferences.deiconify()
         
 
 #Edit Menu Functions:
