@@ -220,6 +220,11 @@ class App:
     
     def do_error(self, error_msg):
         error_pop_up = Toplevel()
+        w = self.root.winfo_screenwidth()
+        h = self.root.winfo_screenheight()
+        x = str((w/2)-200)
+        y = str((h/2)-200)
+        error_pop_up.geometry('+'+x+'+'+y)
         error_pop_up.title("Error")
         error_pop_up.grid_columnconfigure(0, minsize=200)
         
@@ -231,6 +236,11 @@ class App:
         
     def do_popup(self, title, msg):
         pop_up = Toplevel()
+        w = self.root.winfo_screenwidth()
+        h = self.root.winfo_screenheight()
+        x = str((w/2)-200)
+        y = str((h/2)-200)
+        pop_up.geometry('+'+x+'+'+y)
         pop_up.title(title)
         pop_up.grid_columnconfigure(0, minsize=200)
         
@@ -507,6 +517,11 @@ prompt exactly matches the .org offset, or there will be issues.", width=400, pa
 
     def doPreferences(self):
         self.preferences = Toplevel()
+        w = self.root.winfo_screenwidth()
+        h = self.root.winfo_screenheight()
+        x = str((w/2)-200)
+        y = str((h/2)-200)
+        self.preferences.geometry('+'+x+'+'+y)
         self.preferences.title("Preferences")
         self.preferences.grid_columnconfigure(0, minsize=150)
         
