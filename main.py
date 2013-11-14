@@ -99,6 +99,7 @@ class CustomText(tk.Text):
         for label in self.labels: self.highlight_sub_pattern(label, "LABEL")
         
         self.flag = True
+
     def highlight_pattern(self, pattern, tag, start="1.0", end="end", regexp=True):
         """Apply the given tag to all text that matches the given pattern
 
@@ -127,8 +128,6 @@ class CustomText(tk.Text):
             if text[:6] == ".thumb": continue
             if text[:5] == ".org": continue
             if tag == "LABEL":
-                print index
-                print text[0:-1]
                 self.labels.append(text[0:-1])
             self.tag_add(tag, "matchStart","matchEnd")
             
@@ -518,6 +517,15 @@ prompt exactly matches the .org offset, or there will be issues.", width=400, pa
         bg_button = Button(self.preferences, text="Color Chooser", command=self.deal_with_bg_color , width=15)
         bg_button.grid(row=1, column=1, pady=5, padx=5)
         
+        highlight_message = Message(self.preferences, text="-Syntax Highlighting-", width=200)
+        highlight_message.grid(row=1, column=1, pady=5, padx=5)
+        
+        label_msg = Message(self.preferences, text="Label Color", width=100)
+        label_msg.grid(row=3, column=0, pady=5)
+        
+        label_button = Button(self.preferences, text="Color Chooser", command=self.deal_with_bg_color , width=15)
+        label_button.grid(row=3, column=1, pady=5, padx=5)
+        
     def deal_with_fg_color(self):
         color = askcolor()
         self.text.config(fg=color[1])
@@ -527,6 +535,8 @@ prompt exactly matches the .org offset, or there will be issues.", width=400, pa
         color = askcolor()
         self.text.config(bg=color[1])
         self.preferences.deiconify()
+        
+    def edit_labels
         
 
 #Edit Menu Functions:
