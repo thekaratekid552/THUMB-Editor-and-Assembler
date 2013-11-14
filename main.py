@@ -508,45 +508,108 @@ prompt exactly matches the .org offset, or there will be issues.", width=400, pa
     def doPreferences(self):
         self.preferences = Toplevel()
         self.preferences.title("Preferences")
-        self.preferences.grid_columnconfigure(0, minsize=100)
+        self.preferences.grid_columnconfigure(0, minsize=150)
         
-        fg_msg = Message(self.preferences, text="Foreground Color", width=100)
-        fg_msg.grid(row=0, column=0, pady=5)
+        options_message = Message(self.preferences, text="-Basic Options-", width=200)
+        options_message.grid(row=0, column=0, pady=5, columnspan = 2)
+        
+        fg_msg = Message(self.preferences, text="Foreground Color", width=150)
+        fg_msg.grid(row=1, column=0, pady=5)
         
         fg_button = Button(self.preferences, text="Color Chooser", command=self.deal_with_fg_color , width=15)
-        fg_button.grid(row=0, column=1, pady=5, padx=5)
+        fg_button.grid(row=1, column=1, pady=5, padx=5)
         
-        bg_msg = Message(self.preferences, text="Background Color", width=100)
-        bg_msg.grid(row=1, column=0, pady=5)
+        bg_msg = Message(self.preferences, text="Background Color", width=150)
+        bg_msg.grid(row=2, column=0, pady=5)
         
         bg_button = Button(self.preferences, text="Color Chooser", command=self.deal_with_bg_color , width=15)
-        bg_button.grid(row=1, column=1, pady=5, padx=5)
+        bg_button.grid(row=2, column=1, pady=5, padx=5)
         
         highlight_message = Message(self.preferences, text="-Syntax Highlighting-", width=200)
-        highlight_message.grid(row=1, column=1, columnspan = 2, pady=5, padx=5)
+        highlight_message.grid(row=3, column=0, columnspan = 2, pady=5, padx=5)
         
-        label_msg = Message(self.preferences, text="Label Color", width=100)
-        label_msg.grid(row=3, column=0, pady=5)
+        label_msg = Message(self.preferences, text="Label Color", width=150)
+        label_msg.grid(row=4, column=0, pady=5)
         
-        label_button = Button(self.preferences, text="Color Chooser", command=self.deal_with_bg_color , width=15)
-        label_button.grid(row=3, column=1, pady=5, padx=5)
+        label_button = Button(self.preferences, text="Color Chooser", command=self.deal_with_labels_color , width=15)
+        label_button.grid(row=4, column=1, pady=5, padx=5)
+        
+        large_msg = Message(self.preferences, text="Defined Number Color", width=150)
+        large_msg.grid(row=5, column=0, pady=5)
+        
+        large_button = Button(self.preferences, text="Color Chooser", command=self.deal_with_large_color , width=15)
+        large_button.grid(row=5, column=1, pady=5, padx=5)
+        
+        comment_msg = Message(self.preferences, text="Comment Color", width=150)
+        comment_msg.grid(row=6, column=0, pady=5)
+        
+        comment_button = Button(self.preferences, text="Color Chooser", command=self.deal_with_comment_color , width=15)
+        comment_button.grid(row=6, column=1, pady=5, padx=5)
         
     def deal_with_fg_color(self):
         color = askcolor()
         self.text.config(fg=color[1])
         self.preferences.deiconify()
+        self.preference_storer("store")
         
     def deal_with_bg_color(self):
         color = askcolor()
         self.text.config(bg=color[1])
         self.preferences.deiconify()
+        self.preference_storer("store")
         
-    def edit_labels(self):
+    def deal_with_labels_color(self):
     	color = askcolor()
     	self.text.label_color = color[1]
     	self.preferences.deiconify()
-        
+    	self.preference_storer("store")
+    	
+    def deal_with_large_color(self):
+    	color = askcolor()
+    	self.text.large_color = color[1]
+    	self.preferences.deiconify()
+    	self.preference_storer("store")
+    	
+    def deal_with_comment_color(self):
+    	color = askcolor()
+    	self.text.comment_color = color[1]
+    	self.preferences.deiconify()
+        self.preference_storer("store")
 
+
+
+
+
+
+    def preference_storer(self, method):
+        with open(os.path.join(self.path, "preferences.ini"), "r+") as prefs:
+        
+            if method == "store":
+                for opt in opts_b:
+                    tmp = self.text.config(opt)
+                    prefs.write(tmp[4]+"\n")
+                    
+                for opt in opts_sh:
+                    tmp = opt
+                    prefs.write(tmp+"\n")
+                return
+            if method == "load":
+                line = prefs.read(1)
+                if line == "":
+                    print False
+                    return
+                prefs.seek(0)
+                tmp = prefs.readline()
+                self.text.config(fg=tmp[0:7])
+                tmp = prefs.readline()
+                self.text.config(bg=tmp[0:7])
+                tmp = prefs.readline()
+                self.text.label_color = tmp[0:7]
+                tmp = prefs.readline()
+                self.text.large_color = tmp[0:7]
+                tmp = prefs.readline()
+                self.text.comment_color = tmp[0:7]
+                return
 #Edit Menu Functions:
 #----------------------------------------------------------------------
     def selectall(self, *args):
@@ -660,6 +723,9 @@ to add line numbers and whose code I merged with mine.", width=400, pady=5)
         edit_menu.add_command(label="Undo", command=self.text.edit_undo, accelerator="Ctrl+z")
         edit_menu.add_command(label="Redo", command=self.text.edit_redo, accelerator="Ctrl+y")
         
+        self.preference_storer("load")
+        
+
     def _on_change(self, event):
         self.linenumbers.redraw()
         self.text.highlighting()
