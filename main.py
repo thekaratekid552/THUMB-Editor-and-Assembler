@@ -92,12 +92,12 @@ class CustomText(tk.Text):
         
         #Highlight LABELS
         self.tag_configure("LABEL",foreground=self.label_color)
-        self.highlight_pattern(r"\m[^. ]*:", "LABEL")
+        self.highlight_pattern(r"\m[^.\t ]*:", "LABEL")
         self.tag_lower("LABEL", belowThis="COMMENT")
         
         #Highlight large numbers
         self.tag_configure("LARGE",foreground=self.large_color)
-        self.highlight_pattern(r"\.[^ ]*\y", "LARGE")
+        self.highlight_pattern(r"\.[^\t ]*", "LARGE")
         self.tag_lower("LARGE", belowThis="COMMENT")
         
         #highlight all labels elsewhere
@@ -590,6 +590,12 @@ prompt exactly matches the .org offset, or there will be issues.", width=400, pa
     	self.text.comment_color = color[1]
     	self.preferences.deiconify()
         self.preference_storer("store")
+        #DO THIS!!!!!!
+	def deal_with_cursor_color(self):
+    	color = askcolor()
+    	self.text.comment_color = color[1]
+    	self.preferences.deiconify()
+        self.preference_storer("store")
 
 
 
@@ -597,8 +603,10 @@ prompt exactly matches the .org offset, or there will be issues.", width=400, pa
 
 
     def preference_storer(self, method):
+    	opts_b = ["fg", "bg", "insertbackground"]
+    	opts_sh = [self.text.label_color, self.text.large_color, self.text.comment_color]
         with open(os.path.join(self.path, "preferences.ini"), "r+") as prefs:
-        
+        	
             if method == "store":
                 for opt in opts_b:
                     tmp = self.text.config(opt)
@@ -608,6 +616,7 @@ prompt exactly matches the .org offset, or there will be issues.", width=400, pa
                     tmp = opt
                     prefs.write(tmp+"\n")
                 return
+            
             if method == "load":
                 line = prefs.read(1)
                 if line == "":
@@ -619,11 +628,14 @@ prompt exactly matches the .org offset, or there will be issues.", width=400, pa
                 tmp = prefs.readline()
                 self.text.config(bg=tmp[0:7])
                 tmp = prefs.readline()
+                self.text.config(insertbackground=tmp[0:7])
+                tmp = prefs.readline()
                 self.text.label_color = tmp[0:7]
                 tmp = prefs.readline()
                 self.text.large_color = tmp[0:7]
                 tmp = prefs.readline()
                 self.text.comment_color = tmp[0:7]
+                
                 return
 #Edit Menu Functions:
 #----------------------------------------------------------------------
@@ -714,11 +726,13 @@ to add line numbers and whose code I merged with mine.", width=400, pady=5)
         # Set up the text widget
         self.text = CustomText(self.root)
         self.vsb = tk.Scrollbar(orient="vertical", command=self.text.yview)
-        self.text.configure(yscrollcommand=self.vsb.set)
+        self.xsb = tk.Scrollbar(orient="horizontal", command=self.text.xview)
+        self.text.configure(wrap=NONE, xscrollcommand=self.xsb.set, yscrollcommand=self.vsb.set, insertbackground="#FFFFFF")
         self.linenumbers = TextLineNumbers(self.root, width=10)
         self.linenumbers.attach(self.text)
 
         self.vsb.pack(side="right", fill="y")
+        self.xsb.pack(side="bottom", fill="x")
         self.linenumbers.pack(side="left", fill="y")
         self.text.pack(side="right", fill="both", expand=True)
 
