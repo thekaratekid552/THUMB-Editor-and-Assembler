@@ -561,6 +561,13 @@ prompt exactly matches the .org offset, or there will be issues.", width=400, pa
         comment_button = Button(self.preferences, text="Color Chooser", command=self.deal_with_comment_color , width=15)
         comment_button.grid(row=6, column=1, pady=5, padx=5)
         
+        cursor_msg = Message(self.preferences, text="Cursor Color", width=150)
+        cursor_msg.grid(row=7, column=0, pady=5)
+        
+        cursor_button = Button(self.preferences, text="Color Chooser", command=self.deal_with_cursor_color , width=15)
+        cursor_button.grid(row=7, column=1, pady=5, padx=5)
+        
+        
     def deal_with_fg_color(self):
         color = askcolor()
         self.text.config(fg=color[1])
@@ -590,11 +597,11 @@ prompt exactly matches the .org offset, or there will be issues.", width=400, pa
     	self.text.comment_color = color[1]
     	self.preferences.deiconify()
         self.preference_storer("store")
-        #DO THIS!!!!!!
-	def deal_with_cursor_color(self):
-    	color = askcolor()
-    	self.text.comment_color = color[1]
-    	self.preferences.deiconify()
+
+    def deal_with_cursor_color(self):
+        color = askcolor()
+        self.text.config(insertbackground=color[1])
+        self.preferences.deiconify()
         self.preference_storer("store")
 
 
