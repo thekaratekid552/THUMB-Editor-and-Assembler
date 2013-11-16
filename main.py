@@ -612,6 +612,8 @@ prompt exactly matches the .org offset, or there will be issues.", width=400, pa
     def preference_storer(self, method):
     	opts_b = ["fg", "bg", "insertbackground"]
     	opts_sh = [self.text.label_color, self.text.large_color, self.text.comment_color]
+        
+        with open(os.path.join(self.path, "preferences.ini"), "w+") as prefs: prefs.close()
         with open(os.path.join(self.path, "preferences.ini"), "r+") as prefs:
         	
             if method == "store":
@@ -627,7 +629,6 @@ prompt exactly matches the .org offset, or there will be issues.", width=400, pa
             if method == "load":
                 line = prefs.read(1)
                 if line == "":
-                    print False
                     return
                 prefs.seek(0)
                 tmp = prefs.readline()
