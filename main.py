@@ -116,8 +116,9 @@ class CustomText(tk.Text):
         self.mark_set("matchStart",start)
         self.mark_set("matchEnd",start)
         self.mark_set("searchLimit", end)
-
+        self.global_line = 0.0
         count = tk.IntVar()
+        
         while True:
             index = self.search(pattern, "matchEnd","searchLimit",
                                 count=count, regexp=regexp)
@@ -132,6 +133,10 @@ class CustomText(tk.Text):
             if text[:6] == ".align": continue
             if text[:6] == ".thumb": continue
             if text[:5] == ".org": continue
+            if text[:6] == ".text": continue
+            if text[:8] == ".global": 
+                self.global_line = int(float(index))
+                continue
             if tag == "LABEL":
                 self.labels.append(text[0:-1])
             self.tag_add(tag, "matchStart","matchEnd")
@@ -150,6 +155,10 @@ class CustomText(tk.Text):
             if _index == "": break
             self.mark_set("matchStart", _index)
             self.mark_set("matchEnd", "%s+%sc" % (_index,_count.get()))
+            if self.global_line != 0.0:
+                if self.global_line == int(float(_index)):
+                    continue
+            
             self.tag_add(tag, "matchStart","matchEnd")
         
 class TextLineNumbers(tk.Canvas):
