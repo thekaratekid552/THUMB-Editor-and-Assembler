@@ -622,7 +622,8 @@ prompt exactly matches the .org offset, or there will be issues.", width=400, pa
     	opts_b = ["fg", "bg", "insertbackground"]
     	opts_sh = [self.text.label_color, self.text.large_color, self.text.comment_color]
         
-        with open(os.path.join(self.path, "preferences.ini"), "w+") as prefs: prefs.close()
+        #with open(os.path.join(self.path, "preferences.ini"), "w+") as prefs: prefs.close()
+        
         with open(os.path.join(self.path, "preferences.ini"), "r+") as prefs:
         	
             if method == "store":
