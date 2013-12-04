@@ -1,5 +1,6 @@
 #http://my-python3-code.blogspot.com/2012/08/basic-tkinter-text-editor-online-example.html
 import tkFileDialog
+import os, platform, time, math
 from Tkinter import *
 import Tkinter as tk
 import os.path
@@ -393,7 +394,8 @@ class App:
             data.write("\n")
         
         as_proccess = subprocess.Popen(["as", "-mthumb", "-mthumb-interwork", "--fatal-warnings", source], bufsize=2048, shell=True, stderr=subprocess.PIPE)
-        print os.path.join(, "as")
+        dir = module_path()
+        print dir
         (as_output, as_err) = as_proccess.communicate()
         
         as_proccess.wait()
