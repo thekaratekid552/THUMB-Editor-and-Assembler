@@ -3,7 +3,6 @@ import tkFileDialog
 import os, platform, time, math
 from Tkinter import *
 import Tkinter as tk
-import os.path
 import sys
 import subprocess
 from tkColorChooser import askcolor
