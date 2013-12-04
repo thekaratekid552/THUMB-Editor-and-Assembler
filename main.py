@@ -393,13 +393,13 @@ class App:
             data.write("\n")
         
         as_proccess = subprocess.Popen(["as", "-mthumb", "-mthumb-interwork", "--fatal-warnings", source], bufsize=2048, shell=True, stderr=subprocess.PIPE)
+        print os.path.join(, "as")
         (as_output, as_err) = as_proccess.communicate()
         
         as_proccess.wait()
         if as_err != "":
             self.do_error(as_err)
             os.remove(source)
-            os.remove("a.out")
             return True
 
         
