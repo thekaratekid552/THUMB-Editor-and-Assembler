@@ -1,21 +1,12 @@
 #http://my-python3-code.blogspot.com/2012/08/basic-tkinter-text-editor-online-example.html
 import tkFileDialog
-import os, platform, time, math
+import os, platform, time, math, sys, subprocess
 from Tkinter import *
 import Tkinter as tk
-import sys
-import subprocess
+from module_locator import *
 from tkColorChooser import askcolor
 
-def we_are_frozen():
-    # All of the modules are built-in to the interpreter, e.g., by py2exe
-    return hasattr(sys, "frozen")
 
-def module_path():
-    encoding = sys.getfilesystemencoding()
-    if we_are_frozen():
-        return os.path.dirname(unicode(sys.executable, encoding))
-    return os.path.dirname(unicode(__file__, encoding))
 
 class CustomText(tk.Text):
     
@@ -392,9 +383,8 @@ class App:
             data.write(textoutput.rstrip())
             data.write("\n")
         
-        as_proccess = subprocess.Popen(["as", "-mthumb", "-mthumb-interwork", "--fatal-warnings", source], bufsize=2048, shell=True, stderr=subprocess.PIPE)
-        dir = module_path()
-        print dir
+        as_proccess = subprocess.Popen([os.path.join(self.path,"as"), "-mthumb", "-mthumb-interwork", "--fatal-warnings", source], bufsize=2048, shell=True, stderr=subprocess.PIPE)
+
         (as_output, as_err) = as_proccess.communicate()
         
         as_proccess.wait()
@@ -550,6 +540,12 @@ prompt exactly matches the .org offset, or there will be issues.", width=400, pa
         bg_button = Button(self.preferences, text="Color Chooser", command=self.deal_with_bg_color , width=15)
         bg_button.grid(row=2, column=1, pady=5, padx=5)
         
+        cursor_msg = Message(self.preferences, text="Cursor Color", width=150)
+        cursor_msg.grid(row=7, column=0, pady=5)
+        
+        cursor_button = Button(self.preferences, text="Color Chooser", command=self.deal_with_cursor_color , width=15)
+        cursor_button.grid(row=7, column=1, pady=5, padx=5)
+        
         highlight_message = Message(self.preferences, text="-Syntax Highlighting-", width=200)
         highlight_message.grid(row=3, column=0, columnspan = 2, pady=5, padx=5)
         
@@ -571,11 +567,7 @@ prompt exactly matches the .org offset, or there will be issues.", width=400, pa
         comment_button = Button(self.preferences, text="Color Chooser", command=self.deal_with_comment_color , width=15)
         comment_button.grid(row=6, column=1, pady=5, padx=5)
         
-        cursor_msg = Message(self.preferences, text="Cursor Color", width=150)
-        cursor_msg.grid(row=7, column=0, pady=5)
         
-        cursor_button = Button(self.preferences, text="Color Chooser", command=self.deal_with_cursor_color , width=15)
-        cursor_button.grid(row=7, column=1, pady=5, padx=5)
         
         
     def deal_with_fg_color(self):
