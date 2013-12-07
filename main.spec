@@ -1,18 +1,16 @@
 # -*- mode: python -*-
-a = Analysis(['main.py'],
-             pathex=['Z:\\home\\roger\\Documents\\python\\asm'],
-             hiddenimports=[],
-             hookspath=None,
-             runtime_hooks=None)
+a = Analysis([os.path.join(HOMEPATH,'support\\_mountzlib.py'), os.path.join(HOMEPATH,'support\\useUnicode.py'), 'Z:\\home\\roger\\Documents\\python\\asm\\main.py'],
+             pathex=['Z:\\home\\roger\\Documents\\python\\asm'])
 pyz = PYZ(a.pure)
-exe = EXE(pyz,
+exe = EXE( pyz,
           a.scripts,
           a.binaries,
           a.zipfiles,
           a.datas,
-          name='main.exe',
+          name=os.path.join('dist', 'main.exe'),
           debug=False,
-          strip=None,
+          strip=False,
           upx=True,
-          console=False,
-          icon='Z:\\home\\roger\\Documents\\python\\asm\\icon.ico')
+          console=True )
+app = BUNDLE(exe,
+             name=os.path.join('dist', 'main.exe.app'))

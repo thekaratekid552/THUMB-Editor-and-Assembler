@@ -1,3 +1,5 @@
+#venv pyi-env-name
+
 #http://my-python3-code.blogspot.com/2012/08/basic-tkinter-text-editor-online-example.html
 import tkFileDialog
 import os, platform, time, math, sys, subprocess
@@ -394,7 +396,7 @@ class App:
             return True
 
         
-        objcopy_proccess = subprocess.Popen("objcopy -O binary a.out "+temp_bin,  bufsize=2048, shell=True, stderr=subprocess.PIPE)
+        objcopy_proccess = subprocess.Popen(str(os.path.join(self.path,"objcopy")+" -O binary "+os.path.join(self.path,"a.out")+" "+temp_bin),  bufsize=2048, shell=True, stderr=subprocess.PIPE)
         (objcopy_output, objcopy_err) = objcopy_proccess.communicate()
         
         objcopy_proccess.wait()
