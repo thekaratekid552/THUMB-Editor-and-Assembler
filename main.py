@@ -385,7 +385,7 @@ class App:
             data.write(textoutput.rstrip())
             data.write("\n")
         
-        as_proccess = subprocess.Popen([os.path.join(self.path,"as"), "-mthumb", "-mthumb-interwork", "--fatal-warnings", source], bufsize=2048, shell=True, stderr=subprocess.PIPE)
+        as_proccess = subprocess.Popen(["as", "-mthumb", "-mthumb-interwork", "--fatal-warnings", source], bufsize=2048, shell=True, stderr=subprocess.PIPE)
 
         (as_output, as_err) = as_proccess.communicate()
         
@@ -396,7 +396,7 @@ class App:
             return True
 
         
-        objcopy_proccess = subprocess.Popen(str(os.path.join(self.path,"objcopy")+" -O binary "+os.path.join(self.path,"a.out")+" "+temp_bin),  bufsize=2048, shell=True, stderr=subprocess.PIPE)
+        objcopy_proccess = subprocess.Popen("objcopy"+" -O binary "+"a.out"+" "+temp_bin,  bufsize=2048, shell=True, stderr=subprocess.PIPE)
         (objcopy_output, objcopy_err) = objcopy_proccess.communicate()
         
         objcopy_proccess.wait()
