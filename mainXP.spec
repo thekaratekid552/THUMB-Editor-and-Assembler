@@ -11,6 +11,6 @@ exe = EXE( pyz,
           debug=False,
           strip=False,
           upx=True,
-          console=True )
+          console=False)
 app = BUNDLE(exe,
              name=os.path.join('dist', 'main.exe.app'))
