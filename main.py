@@ -186,28 +186,47 @@ class App:
 #File Menu Functions:
 #----------------------------------------------------------------------
     def doNew(self, *args):
-            # Clear the text
-            self.text.delete(0.0, END)
+        # Clear the text
+        self.text.delete(0.0, END)
 
     def doSaveAs(self, *args):
-            # Returns the saved file
-            file = tkFileDialog.asksaveasfile(mode='w', defaultextension=".asm")
-            if file == None:
-                return False
-            textoutput = self.text.get(0.0, END) # Gets all the text in the field
-            file.write(textoutput.rstrip()) # With blank perameters, this cuts off all whitespace after a line.
-            file.write("\n") # Then we add a newline character.
+        # Returns the saved file
+        if self.open_file != None:
+            self.current_dir = os.path.dirname(self.open_file.name)
+        else: self.current_dir = "."
+        file = tkFileDialog.asksaveasfile(mode='w', defaultextension=".asm", initialdir=self.current_dir)
+        if file == None:
+            return False
+        textoutput = self.text.get(0.0, END) # Gets all the text in the field
+        file.write(textoutput.rstrip()) # With blank perameters, this cuts off all whitespace after a line.
+        file.write("\n") # Then we add a newline character.
+        file.close()
+        self.open_file = open(file.name, "r+")
+        
+    def doSave(self, *args):
+        #Save to currently open file.
+
+        self.open_file.seek(0)
+        self.open_file.truncate()
+        textoutput = self.text.get(0.0, END) # Gets all the text in the field
+        self.open_file.write(textoutput.rstrip()) # With blank perameters, this cuts off all whitespace after a line.
+        self.open_file.write("\n")
+        self.open_file.close()
 
     def doOpen(self, *args):
-            # Returns the opened file
-            file = tkFileDialog.askopenfile(mode='r')
-            if file == None:
-                return False
-            fileContents = file.read() # Get all the text from file.
+        # Returns the opened file
+        if self.open_file != None:
+            self.current_dir = os.path.dirname(self.open_file.name)
+        else: self.current_dir = "."
+        tmp = tkFileDialog.askopenfile(mode='r+', initialdir=self.current_dir)
+        if tmp == None:
+            return False
+        else: self.open_file = tmp
+        fileContents = self.open_file.read() # Get all the text from file.
 
-            # Set current text to file contents
-            self.text.delete(0.0, END)
-            self.text.insert(0.0, fileContents)  
+        # Set current text to file contents
+        self.text.delete(0.0, END)
+        self.text.insert(0.0, fileContents)  
 
 #Compile Menu Functions:
 #----------------------------------------------------------------------            
@@ -725,7 +744,9 @@ to add line numbers and whose code I merged with mine.", width=400, pady=5)
         filemenu.add_command(label="Open", command=self.doOpen, accelerator="Ctrl+o")
 
         # Try out the saveAsDialog
-        filemenu.add_command(label="Save", command=self.doSaveAs, accelerator="Ctrl+Shift+s")
+        filemenu.add_command(label="Save as", command=self.doSaveAs, accelerator="Ctrl+Shift+s")
+        filemenu.add_command(label="Save", command=self.doSave, accelerator="Ctrl+s")
+        
         
         
         menubar.add_cascade(label="File", menu=filemenu)
@@ -759,6 +780,7 @@ to add line numbers and whose code I merged with mine.", width=400, pady=5)
         self.text.bind("<Control-Key-U>", self.doRomInsertOrg)
         self.text.bind("<Control-Key-o>", self.doOpen)
         self.text.bind("<Control-Key-S>", self.doSaveAs)
+        self.text.bind("<Control-Key-s>", self.doSave)
         self.text.bind("<Control-Key-z>", self.text.edit_undo)
         self.text.bind("<Control-Key-y>", self.text.edit_redo)
         
@@ -766,6 +788,17 @@ to add line numbers and whose code I merged with mine.", width=400, pady=5)
         edit_menu.add_command(label="Redo", command=self.text.edit_redo, accelerator="Ctrl+y")
         
         self.preference_storer("load")
+        l = len(sys.argv)
+        l -= 1
+        if sys.argv[l]:
+            file_name = sys.argv[l]
+            self.open_file = open(str(file_name), "r+")
+            fileContents = self.open_file.read() # Get all the text from file.
+
+            # Set current text to file contents
+            self.text.delete(0.0, END)
+            self.text.insert(0.0, fileContents)  
+            
         
 
     def _on_change(self, event):

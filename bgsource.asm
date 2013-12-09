@@ -1,5 +1,6 @@
 .align 2
 .thumb 
+.text
 
 /*Well, this is the source code for the battle bg hack. Pretty simple stuff.
 When the battle bg is loaded, the game stores the background number to be loaded in r0.
@@ -29,76 +30,76 @@ to include the var_loader, so this source code is the all in one.*/
 
 
 .org 0xF00000
-Main:	ldr r5, new_bg_table
-		push {r5}
-		push {r1}
-		bl varloader
-		
-post_var_loader:	cmp r1,#0x0
-		beq return
-		mov r0,r1
-		
-return:	pop {r1}
-		ldr r5, return_offset
-		lsl r4,r0,#0x2
-		add r4,r4,r0
-		bx r5
-		
-varloader:	push {r0, r2}
-		ldr r0, var_id
-		bl call_decrypt
-		ldrh r0, [r0]
-		mov r1, r0
-		pop {r0,r2}
-		bl post_var_loader
-		
-call_decrypt:	ldr r2, vardecrypt
-		bx r2
-		
-		
+Main:        ldr r5, new_bg_table
+                push {r5}
+                push {r1}
+                bl varloader
+                
+post_var_loader:        cmp r1,#0x0
+                beq return
+                mov r0,r1
+                
+return:        pop {r1}
+                ldr r5, return_offset
+                lsl r4,r0,#0x2
+                add r4,r4,r0
+                bx r5
+                
+varloader:        push {r0, r2}
+                ldr r0, var_id
+                bl call_decrypt
+                ldrh r0, [r0]
+                mov r1, r0
+                pop {r0,r2}
+                bl post_var_loader
+                
+call_decrypt:        ldr r2, vardecrypt
+                bx r2
+                
+                
 .align 2
-		
-		
+                
+                
 
-var_id: 	.word  0x000040F7
-vardecrypt: 	.word  0x0806E455
-new_bg_table:	.word	0x08F10000
-return_offset:	.word	0x0800F271
+var_id:         .word  0x000040F7
+vardecrypt:         .word  0x0806E455
+new_bg_table:        .word        0x08F10000
+return_offset:        .word        0x0800F271
 
 
 
-.align 2
-
-Main2:	ldr r5, new_bg_table2
-		push {r5}
-		push {r1}
-		bl varloader2
-		
-post_var_loader2:	cmp r1,#0x0
-		beq return2
-		mov r0,r1
-		
-return2:	pop {r1}
-		ldr r5, return_offset2
-		lsl r4,r0,#0x2
-		add r4,r4,r0
-		bx r5
-		
-varloader2:	push {r0, r2}
-		ldr r0, var_id2
-		bl call_decrypt2
-		ldrh r0, [r0]
-		mov r1, r0
-		pop {r0,r2}
-		bl post_var_loader2
-		
-call_decrypt2:	ldr r2, vardecrypt2
-		bx r2
-		
 .align 2
 
+Main2:        ldr r5, new_bg_table2
+                push {r5}
+                push {r1}
+                bl varloader2
+                
+post_var_loader2:        cmp r1,#0x0
+                beq return2
+                mov r0,r1
+                
+return2:        pop {r1}
+                ldr r5, return_offset2
+                lsl r4,r0,#0x2
+                add r4,r4,r0
+                bx r5
+                
+varloader2:        push {r0, r2}
+                ldr r0, var_id2
+                bl call_decrypt2
+                ldrh r0, [r0]
+                mov r1, r0
+                pop {r0,r2}
+                bl post_var_loader2
+                
+call_decrypt2:        ldr r2, vardecrypt2
+                bx r2
+                
+.align 2
 
-var_id2: 	.word  0x000040F7
-vardecrypt2: 	.word  0x0806E455
-new_bg_table2:	.word	0x08F10000
-return_offset2:	.word	0x0800F2BC
+
+var_id2:         .word  0x000040F7
+vardecrypt2:         .word  0x0806E455
+new_bg_table2:        .word        0x08F10000
+return_offset2:        .word        0x0800F2BC
