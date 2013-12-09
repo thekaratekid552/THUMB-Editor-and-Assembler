@@ -562,31 +562,31 @@ prompt exactly matches the .org offset, or there will be issues.", width=400, pa
         bg_button.grid(row=2, column=1, pady=5, padx=5)
         
         cursor_msg = Message(self.preferences, text="Cursor Color", width=150)
-        cursor_msg.grid(row=7, column=0, pady=5)
+        cursor_msg.grid(row=3, column=0, pady=5)
         
         cursor_button = Button(self.preferences, text="Color Chooser", command=self.deal_with_cursor_color , width=15)
-        cursor_button.grid(row=7, column=1, pady=5, padx=5)
+        cursor_button.grid(row=3, column=1, pady=5, padx=5)
         
         highlight_message = Message(self.preferences, text="-Syntax Highlighting-", width=200)
-        highlight_message.grid(row=3, column=0, columnspan = 2, pady=5, padx=5)
+        highlight_message.grid(row=4, column=0, columnspan = 2, pady=5, padx=5)
         
         label_msg = Message(self.preferences, text="Label Color", width=150)
-        label_msg.grid(row=4, column=0, pady=5)
+        label_msg.grid(row=5, column=0, pady=5)
         
         label_button = Button(self.preferences, text="Color Chooser", command=self.deal_with_labels_color , width=15)
-        label_button.grid(row=4, column=1, pady=5, padx=5)
+        label_button.grid(row=5, column=1, pady=5, padx=5)
         
         large_msg = Message(self.preferences, text="Defined Number Color", width=150)
-        large_msg.grid(row=5, column=0, pady=5)
+        large_msg.grid(row=6, column=0, pady=5)
         
         large_button = Button(self.preferences, text="Color Chooser", command=self.deal_with_large_color , width=15)
-        large_button.grid(row=5, column=1, pady=5, padx=5)
+        large_button.grid(row=6, column=1, pady=5, padx=5)
         
         comment_msg = Message(self.preferences, text="Comment Color", width=150)
-        comment_msg.grid(row=6, column=0, pady=5)
+        comment_msg.grid(row=7, column=0, pady=5)
         
         comment_button = Button(self.preferences, text="Color Chooser", command=self.deal_with_comment_color , width=15)
-        comment_button.grid(row=6, column=1, pady=5, padx=5)
+        comment_button.grid(row=7, column=1, pady=5, padx=5)
         
         
         
@@ -788,16 +788,19 @@ to add line numbers and whose code I merged with mine.", width=400, pady=5)
         edit_menu.add_command(label="Redo", command=self.text.edit_redo, accelerator="Ctrl+y")
         
         self.preference_storer("load")
-        l = len(sys.argv)
-        l -= 1
-        if sys.argv[l]:
-            file_name = sys.argv[l]
+
+        if len(sys.argv) > 1:
+            file_name = sys.argv[1]
             self.open_file = open(str(file_name), "r+")
             fileContents = self.open_file.read() # Get all the text from file.
 
             # Set current text to file contents
             self.text.delete(0.0, END)
-            self.text.insert(0.0, fileContents)  
+            self.text.insert(0.0, fileContents)
+			
+        else:
+            self.open_file = None
+			
             
         
 
