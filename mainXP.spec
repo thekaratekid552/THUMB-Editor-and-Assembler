@@ -1,6 +1,7 @@
 # -*- mode: python -*-
 a = Analysis(['C:\\Documents and Settings\\Roger.IPOD\\Desktop\\THUMB-Editor-and-Assembler\\main.py'],
              pathex=['C:\\Documents and Settings\\Roger.IPOD\Desktop\\THUMB-Editor-and-Assembler'])
+             
 pyz = PYZ(a.pure)
 exe = EXE( pyz,
           a.scripts,
