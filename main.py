@@ -7,6 +7,7 @@ from Tkinter import *
 import Tkinter as tk
 from module_locator import *
 from tkColorChooser import askcolor
+import tkMessageBox
 
 
 
@@ -696,6 +697,13 @@ prompt exactly matches the .org offset, or there will be issues.", width=400, pa
         self.text.mark_set(INSERT, "1.0")
         self.text.see(INSERT)
         return 'break'
+        
+    def insert_comment(self, *args):
+        self.text.insert(INSERT, "/**/")
+        cursor = self.text.index(INSERT)
+        cursor = cursor.split(".")
+        self.text.mark_set(INSERT, "%d.%d" % (int(cursor[0]), int(cursor[1]) - 2))
+        
 
 
 
@@ -728,6 +736,10 @@ to add line numbers and whose code I merged with mine.", width=400, pady=5)
         self.root.title("THUMB Editor")
         self.root.minsize(width=500,height=400)
         self.path = module_path()
+        
+        self.root.protocol('WM_DELETE_WINDOW', self.ask_if_need_to_save)
+
+        
                
         # Set up basic Menu
         menubar = Menu(self.root)
@@ -742,6 +754,7 @@ to add line numbers and whose code I merged with mine.", width=400, pady=5)
         edit_menu.add_command(label="Copy", accelerator="Ctrl+c", command=lambda: self.text.event_generate('<Control-c>'))
         edit_menu.add_command(label="Paste", accelerator="Ctrl+v", command=lambda: self.text.event_generate('<Control-v>'))
         edit_menu.add_command(label="Select All", command=self.selectall, accelerator="Ctrl+a")
+        edit_menu.add_command(label="Insert Comment", command=self.insert_comment, accelerator="Ctrl+q")
         
         
         
@@ -803,6 +816,7 @@ to add line numbers and whose code I merged with mine.", width=400, pady=5)
         self.text.bind("<Control-Key-s>", self.doSave)
         self.text.bind("<Control-Key-z>", self.text.edit_undo)
         self.text.bind("<Control-Key-y>", self.text.edit_redo)
+        self.text.bind("<Control-Key-q>", self.insert_comment)
         
         edit_menu.add_command(label="Undo", command=self.text.edit_undo, accelerator="Ctrl+z")
         edit_menu.add_command(label="Redo", command=self.text.edit_redo, accelerator="Ctrl+y")
@@ -822,7 +836,33 @@ to add line numbers and whose code I merged with mine.", width=400, pady=5)
             self.open_file = None
 			
             
-        
+    def ask_if_need_to_save(self):
+            textoutput = self.text.get(0.0, END)
+            if self.open_file != None:
+                fileoutput = self.open_file.read()
+                if fileoutput != textoutput:
+                    result = tkMessageBox.askyesnocancel("Save changes?", 
+                    "Save changes to "+self.open_file.name+" before quitting?")
+                    
+                    if result == True:
+                        self.doSave()
+                        self.root.destroy()
+                    elif result == False:
+                        self.root.destroy()
+                    
+                else: self.root.destroy()
+            else:
+                result = tkMessageBox.askyesnocancel("Save changes?", 
+                    "Save changes before quitting?")
+                    
+                if result == True:
+                    self.doSaveAs()
+                    self.root.destroy()
+                elif result == False:
+                    self.root.destroy()
+            
+                    
+            
 
     def _on_change(self, event):
         self.linenumbers.redraw()
