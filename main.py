@@ -195,6 +195,7 @@ class App:
         if self.open_file != None:
             self.current_dir = os.path.dirname(self.open_file.name)
         else: self.current_dir = "."
+        
         file = tkFileDialog.asksaveasfile(mode='w', defaultextension=".asm", initialdir=self.current_dir)
         if file == None:
             return False
@@ -336,8 +337,13 @@ class App:
         error = self.createBinary("temp.asm", self.binary)
         if error:
             return False
-            
-        self.ROM = tkFileDialog.askopenfile(mode='r+b', title="Select Rom...", filetypes=[("Rom Files","*.gba"), ("Binary Files",'*.bin'),('All Files','*')])
+        if self.open_file != None:
+            self.current_dir = os.path.dirname(self.open_file.name)
+        else: self.current_dir = "."
+        
+        self.ROM = tkFileDialog.askopenfile(mode='r+b', title="Select Rom...", 
+        initialdir=self.current_dir,
+        filetypes=[("Rom Files","*.gba"), ("Binary Files",'*.bin'),('All Files','*')])
         if self.ROM == None:
             return False
         
@@ -378,8 +384,16 @@ class App:
         
         
     def doBinCompile(self, *args):
-        open_file = tkFileDialog.asksaveasfile(mode='w', defaultextension=".bin", title="Compile Binary as...")
-        #os.chdir(self.path)
+        if self.open_file != None:
+            self.current_dir = os.path.dirname(self.open_file.name)
+        else: self.current_dir = "."
+        
+        open_file = tkFileDialog.asksaveasfile(
+        mode='w', 
+        initialdir=self.current_dir,
+        defaultextension=".bin", 
+        title="Compile Binary as...")
+
         if open_file == None:
             return False
         binary = open_file.name
