@@ -337,6 +337,7 @@ class App:
         error = self.createBinary("temp.asm", self.binary)
         if error:
             return False
+            
         if self.open_file != None:
             self.current_dir = os.path.dirname(self.open_file.name)
         else: self.current_dir = "."
@@ -419,16 +420,15 @@ class App:
             data.write(textoutput.rstrip())
             data.write("\n")
         
+        assembler = "\""+os.path.join(self.path,"as")+"\""
+        
         as_proccess = subprocess.Popen(
-        ["as", "-mthumb", "-mthumb-interwork", 
-        "--fatal-warnings", source], 
+        [assembler, "-mthumb", "-mthumb-interwork", "--fatal-warnings", source], 
         bufsize=2048, shell=True, 
         stderr=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stdin=subprocess.PIPE)
         
-        #as_proccess.stdout.close()
-        #as_proccess.stdin.close()
 
         (as_output, as_err) = as_proccess.communicate()
         
@@ -437,19 +437,18 @@ class App:
             self.do_error(as_err)
             os.remove(source)
             return True
-
+            
+        objcopy = "\""+os.path.join(self.path,"objcopy")+"\""
+        a_out = "\""+os.path.join(self.path,"a.out")+"\""
         
         objcopy_proccess = subprocess.Popen(
-        "objcopy"+" -O binary "+"\""+os.path.join(self.path,"a.out")+"\""+" "+"\""+temp_bin+"\"",  
+        objcopy+" -O binary "+a_out+" "+"\""+temp_bin+"\"",  
         bufsize=2048, 
         shell=True, 
         stderr=subprocess.PIPE,
         stdout=subprocess.PIPE,
         stdin=subprocess.PIPE)
-        #print "objcopy"+" -O binary "+"\""+os.path.join(self.path,"a.out")+"\""+" "+"\""+temp_bin+"\""
-        
-        #objcopy_proccess.stdout.close()
-        #objcopy_proccess.stdin.close()
+
         
         (objcopy_output, objcopy_err) = objcopy_proccess.communicate()
         
@@ -461,9 +460,11 @@ class App:
             return True
             
         
-        #clean-up temp files
+
         os.remove(source)
         os.remove("a.out")
+        as_proccess.terminate()
+        objcopy_proccess.terminate()
         return False
         
     def doRomInsertOrg(self, *args):
@@ -831,6 +832,7 @@ to add line numbers and whose code I merged with mine.", width=400, pady=5)
         self.text.bind("<Control-Key-z>", self.text.edit_undo)
         self.text.bind("<Control-Key-y>", self.text.edit_redo)
         self.text.bind("<Control-Key-q>", self.insert_comment)
+        
         
         edit_menu.add_command(label="Undo", command=self.text.edit_undo, accelerator="Ctrl+z")
         edit_menu.add_command(label="Redo", command=self.text.edit_redo, accelerator="Ctrl+y")
