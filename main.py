@@ -189,6 +189,9 @@ class App:
     def doNew(self, *args):
         # Clear the text
         self.text.delete(0.0, END)
+        self.open_file = None
+        self.root.title("THUMB Editor: New File")
+        self.saved_text = None
 
     def doSaveAs(self, *args):
         # Returns the saved file
@@ -200,20 +203,27 @@ class App:
         if file == None:
             return False
         textoutput = self.text.get(0.0, END) # Gets all the text in the field
+        self.saved_text = textoutput
         file.write(textoutput.rstrip()) # With blank perameters, this cuts off all whitespace after a line.
         file.write("\n") # Then we add a newline character.
         file.close()
         self.open_file = open(file.name, "r+")
+        if self.open_file != None:
+            self.root.title("THUMB Editor: "+self.open_file.name)
+        else:
+            self.root.title("THUMB Editor: New File")
         
     def doSave(self, *args):
         #Save to currently open file.
-
-        self.open_file.seek(0)
-        self.open_file.truncate()
-        textoutput = self.text.get(0.0, END) # Gets all the text in the field
-        self.open_file.write(textoutput.rstrip()) # With blank perameters, this cuts off all whitespace after a line.
-        self.open_file.write("\n")
-        self.open_file.close()
+        if self.open_file != None:
+            self.open_file.seek(0)
+            self.open_file.truncate()
+            textoutput = self.text.get(0.0, END) # Gets all the text in the field
+            self.saved_text = textoutput
+            self.open_file.write(textoutput.rstrip()) # With blank perameters, this cuts off all whitespace after a line.
+            self.open_file.write("\n")
+            self.open_file.close()
+        else: self.doSaveAs()
 
     def doOpen(self, *args):
         # Returns the opened file
@@ -229,6 +239,12 @@ class App:
         # Set current text to file contents
         self.text.delete(0.0, END)
         self.text.insert(0.0, fileContents)  
+        self.saved_text = self.text.get(0.0, END)
+        
+        if self.open_file != None:
+            self.root.title("THUMB Editor: "+self.open_file.name)
+        else:
+            self.root.title("THUMB Editor: New File")
 
 #Compile Menu Functions:
 #----------------------------------------------------------------------            
@@ -407,7 +423,7 @@ class App:
             return True
         
     def createBinary(self, name, temp_bin):
-    
+        
         missing_file = self.verify_requirements()
         if missing_file:
             self.do_error("The file "+missing_file+" is missing. Compile aborted.")
@@ -423,7 +439,7 @@ class App:
         assembler = "\""+os.path.join(self.path,"as")+"\""
         
         as_proccess = subprocess.Popen(
-        [assembler, "-mthumb", "-mthumb-interwork", "--fatal-warnings", source], 
+        assembler+" -mthumb "+"-mthumb-interwork "+"--fatal-warnings "+"\""+source+"\"", 
         bufsize=2048, shell=True, 
         stderr=subprocess.PIPE,
         stdout=subprocess.PIPE,
@@ -437,7 +453,7 @@ class App:
             self.do_error(as_err)
             os.remove(source)
             return True
-            
+        
         objcopy = "\""+os.path.join(self.path,"objcopy")+"\""
         a_out = "\""+os.path.join(self.path,"a.out")+"\""
         
@@ -459,12 +475,13 @@ class App:
             os.remove("a.out")
             return True
             
-        
 
         os.remove(source)
         os.remove("a.out")
-        as_proccess.terminate()
-        objcopy_proccess.terminate()
+        #as_proccess.terminate()
+        #objcopy_proccess.terminate()
+        #as_proccess.kill()
+        #objcopy_proccess.kill()
         return False
         
     def doRomInsertOrg(self, *args):
@@ -640,21 +657,21 @@ prompt exactly matches the .org offset, or there will be issues.", width=400, pa
         self.preference_storer("store")
         
     def deal_with_labels_color(self):
-    	color = askcolor()
-    	self.text.label_color = color[1]
-    	self.preferences.deiconify()
-    	self.preference_storer("store")
-    	
+        color = askcolor()
+        self.text.label_color = color[1]
+        self.preferences.deiconify()
+        self.preference_storer("store")
+        
     def deal_with_large_color(self):
-    	color = askcolor()
-    	self.text.large_color = color[1]
-    	self.preferences.deiconify()
-    	self.preference_storer("store")
-    	
+        color = askcolor()
+        self.text.large_color = color[1]
+        self.preferences.deiconify()
+        self.preference_storer("store")
+        
     def deal_with_comment_color(self):
-    	color = askcolor()
-    	self.text.comment_color = color[1]
-    	self.preferences.deiconify()
+        color = askcolor()
+        self.text.comment_color = color[1]
+        self.preferences.deiconify()
         self.preference_storer("store")
 
     def deal_with_cursor_color(self):
@@ -669,13 +686,13 @@ prompt exactly matches the .org offset, or there will be issues.", width=400, pa
 
 
     def preference_storer(self, method):
-    	opts_b = ["fg", "bg", "insertbackground"]
-    	opts_sh = [self.text.label_color, self.text.large_color, self.text.comment_color]
+        opts_b = ["fg", "bg", "insertbackground"]
+        opts_sh = [self.text.label_color, self.text.large_color, self.text.comment_color]
         
         #with open(os.path.join(self.path, "preferences.ini"), "w+") as prefs: prefs.close()
         
         with open(os.path.join(self.path, "preferences.ini"), "r+") as prefs:
-        	
+            
             if method == "store":
                 for opt in opts_b:
                     tmp = self.text.config(opt)
@@ -748,9 +765,11 @@ to add line numbers and whose code I merged with mine.", width=400, pady=5)
     def __init__(self):
         # Set up the screen, the title, and the size.
         self.root = Tk()
-        self.root.title("THUMB Editor")
+        
         self.root.minsize(width=500,height=400)
         self.path = module_path()
+        os.chdir(self.path)
+        
         
         self.root.protocol('WM_DELETE_WINDOW', self.ask_if_need_to_save)
 
@@ -847,16 +866,23 @@ to add line numbers and whose code I merged with mine.", width=400, pady=5)
             # Set current text to file contents
             self.text.delete(0.0, END)
             self.text.insert(0.0, fileContents)
-			
+            self.saved_text = self.text.get(0.0, END)
+            
         else:
             self.open_file = None
-			
+            self.saved_text = None
+            
+        if self.open_file != None:
+            self.root.title("THUMB Editor: "+self.open_file.name)
+        else:
+            self.root.title("THUMB Editor: New File")
             
     def ask_if_need_to_save(self):
-            textoutput = self.text.get(0.0, END)
+            
+
             if self.open_file != None:
-                fileoutput = self.open_file.read()
-                if fileoutput != textoutput:
+                current_text = self.text.get(0.0, END)
+                if current_text != self.saved_text:
                     result = tkMessageBox.askyesnocancel("Save changes?", 
                     "Save changes to "+self.open_file.name+" before quitting?")
                     

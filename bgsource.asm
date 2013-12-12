@@ -1,6 +1,5 @@
 .align 2
 .thumb 
-.text
 
 /*Well, this is the source code for the battle bg hack. Pretty simple stuff.
 When the battle bg is loaded, the game stores the background number to be loaded in r0.
