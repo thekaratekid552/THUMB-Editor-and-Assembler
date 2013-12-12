@@ -191,7 +191,7 @@ class App:
         self.text.delete(0.0, END)
         self.open_file = None
         self.root.title("THUMB Editor: New File")
-        self.saved_text = None
+        self.modded = False
 
     def doSaveAs(self, *args):
         # Returns the saved file
@@ -203,7 +203,7 @@ class App:
         if file == None:
             return False
         textoutput = self.text.get(0.0, END) # Gets all the text in the field
-        self.saved_text = textoutput
+        
         file.write(textoutput.rstrip()) # With blank perameters, this cuts off all whitespace after a line.
         file.write("\n") # Then we add a newline character.
         file.close()
@@ -212,6 +212,7 @@ class App:
             self.root.title("THUMB Editor: "+self.open_file.name)
         else:
             self.root.title("THUMB Editor: New File")
+        self.modded = False
         
     def doSave(self, *args):
         #Save to currently open file.
@@ -219,10 +220,10 @@ class App:
             self.open_file.seek(0)
             self.open_file.truncate()
             textoutput = self.text.get(0.0, END) # Gets all the text in the field
-            self.saved_text = textoutput
             self.open_file.write(textoutput.rstrip()) # With blank perameters, this cuts off all whitespace after a line.
             self.open_file.write("\n")
             self.open_file.close()
+            self.modded = False
         else: self.doSaveAs()
 
     def doOpen(self, *args):
@@ -238,8 +239,8 @@ class App:
 
         # Set current text to file contents
         self.text.delete(0.0, END)
-        self.text.insert(0.0, fileContents)  
-        self.saved_text = self.text.get(0.0, END)
+        self.text.insert(0.0, fileContents)
+        self.modded = False
         
         if self.open_file != None:
             self.root.title("THUMB Editor: "+self.open_file.name)
@@ -852,6 +853,8 @@ to add line numbers and whose code I merged with mine.", width=400, pady=5)
         self.text.bind("<Control-Key-y>", self.text.edit_redo)
         self.text.bind("<Control-Key-q>", self.insert_comment)
         
+        self.text.bind("<<Modified>>", self.on_mod)
+        
         
         edit_menu.add_command(label="Undo", command=self.text.edit_undo, accelerator="Ctrl+z")
         edit_menu.add_command(label="Redo", command=self.text.edit_redo, accelerator="Ctrl+y")
@@ -871,37 +874,42 @@ to add line numbers and whose code I merged with mine.", width=400, pady=5)
         else:
             self.open_file = None
             self.saved_text = None
+        self.modded = False
             
         if self.open_file != None:
             self.root.title("THUMB Editor: "+self.open_file.name)
         else:
             self.root.title("THUMB Editor: New File")
             
+    def on_mod(self, *args):
+        self.modded = True
+    
     def ask_if_need_to_save(self):
+        if self.open_file != None:
             
-
-            if self.open_file != None:
-                current_text = self.text.get(0.0, END)
-                if current_text != self.saved_text:
-                    result = tkMessageBox.askyesnocancel("Save changes?", 
-                    "Save changes to "+self.open_file.name+" before quitting?")
-                    
-                    if result == True:
-                        self.doSave()
-                        self.root.destroy()
-                    elif result == False:
-                        self.root.destroy()
-                    
-                else: self.root.destroy()
-            else:
+            if self.modded == True:
+                result = tkMessageBox.askyesnocancel("Save changes?", 
+                "Save changes to "+self.open_file.name+" before quitting?")
+                
+                if result == True:
+                    self.doSave()
+                    self.root.destroy()
+                elif result == False:
+                    self.root.destroy()
+                
+            else: self.root.destroy()
+        else:
+            if self.modded == True:
                 result = tkMessageBox.askyesnocancel("Save changes?", 
                     "Save changes before quitting?")
-                    
+                
                 if result == True:
                     self.doSaveAs()
                     self.root.destroy()
                 elif result == False:
                     self.root.destroy()
+            else: 
+                self.root.destroy()
             
                     
             
