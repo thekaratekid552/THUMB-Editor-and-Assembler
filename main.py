@@ -10,7 +10,6 @@ from tkColorChooser import askcolor
 import tkMessageBox
 
 
-
 class CustomText(tk.Text):
     
     def __init__(self, *args, **kwargs):
@@ -248,7 +247,16 @@ class App:
             self.root.title("THUMB Editor: New File")
 
 #Compile Menu Functions:
-#----------------------------------------------------------------------            
+#----------------------------------------------------------------------  
+
+	def base_converter(self):
+		self.base = Toplevel()
+		self.base.title("Base Converter")
+		
+		text_input = Entry(self.base)
+		text_input.pack()
+		
+		          
     def verify_requirements(self):
         if not os.path.isfile(os.path.join(self.path,"as.exe")):
             return str(os.path.join(self.path,"as.exe"))
@@ -807,6 +815,7 @@ to add line numbers and whose code I merged with mine.", width=400, pady=5)
         #Create a help menu:
         help_menu = Menu(menubar,tearoff=0)
         help_menu.add_command(label="About", command=self.do_about)
+        help_menu.add_command(label="Base Converter", command=self.base_converter)
 
         # Try out openDialog
         filemenu.add_command(label="Open", command=self.doOpen, accelerator="Ctrl+o")
