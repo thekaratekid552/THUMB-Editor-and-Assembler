@@ -1,6 +1,7 @@
 #venv pyi-env-name
 
 #http://my-python3-code.blogspot.com/2012/08/basic-tkinter-text-editor-online-example.html
+from baseconv import *
 import tkFileDialog
 import os, platform, time, math, sys, subprocess
 from Tkinter import *
@@ -246,16 +247,86 @@ class App:
         else:
             self.root.title("THUMB Editor: New File")
 
-#Compile Menu Functions:
+#Base Converter
 #----------------------------------------------------------------------  
 
-	def base_converter(self):
-		self.base = Toplevel()
-		self.base.title("Base Converter")
-		
-		text_input = Entry(self.base)
-		text_input.pack()
-		
+    def base_converter(self):
+        self.base = Toplevel(padx=5, pady=5)
+        self.base.title("Base Converter")
+        
+
+        self.base_text_input = Entry(self.base)
+        self.base_text_input.pack()
+        
+        self.base_var_a = IntVar(master=self.base)
+        self.base_var_a.set(2)
+        self.base_var_b = IntVar(master=self.base)
+        self.base_var_b.set(2)
+        
+        Label(self.base, text="Convert:").pack()
+        
+        Radiobutton(self.base, text="Binary", variable=self.base_var_a, value=2).pack(anchor=W)
+        Radiobutton(self.base, text="Decimal", variable=self.base_var_a, value=10).pack(anchor=W)
+        Radiobutton(self.base, text="Hexadecimal", variable=self.base_var_a, value=16).pack(anchor=W)
+        
+        Label(self.base, text="To:").pack()
+        
+        Radiobutton(self.base, text="Binary", variable=self.base_var_b, value=2).pack(anchor=W)
+        Radiobutton(self.base, text="Decimal", variable=self.base_var_b, value=10).pack(anchor=W)
+        Radiobutton(self.base, text="Hexadecimal", variable=self.base_var_b, value=16).pack(anchor=W)
+        
+        Button(self.base, text="Convert", command=self.do_conversion).pack()
+        
+        Label(self.base, text="Result:").pack()
+        
+        self.base_text_result = Entry(self.base)
+        self.base_text_result.pack()
+        
+        
+    def do_conversion(self, *args):
+        import re
+        num = self.base_text_input.get()
+        a = self.base_var_a.get()
+        b = self.base_var_b.get()
+        if a == 2:
+            re1=re.compile(r"^[^01]+$")
+            if re1.search(num):
+                self.do_error("Invalid character in base 2.")
+                return
+            num = BINARY(num)
+            
+        elif a == 10:
+            re1=re.compile(r"^[^0-9]+$")
+            if  re1.search(num):
+                self.do_error("Invalid character in base 10.")
+                return
+            num = DECIMAL(num)
+            
+        elif a == 16:
+            re1=re.compile(r"^[^A-Fa-f0-9]+$")
+            if  re1.search(num):
+                self.do_error("Invalid character in base 16.")
+                return
+            num = HEXADECIMAL(num)
+        else: return
+
+
+        if b == 2:
+            num.base = BINARY
+        elif b == 10:
+            num.base = DECIMAL
+        elif b == 16:
+            num.base = HEXADECIMAL
+        else: return
+
+        self.base_text_result.delete(0, END)
+        self.base_text_result.insert(0, num)
+
+        
+        
+        
+#Compile Menu Functions:
+#--------------------------------------------------------------
 		          
     def verify_requirements(self):
         if not os.path.isfile(os.path.join(self.path,"as.exe")):
@@ -764,7 +835,8 @@ is completely open-source. Feel free to modify, but please give credit. Enjoy!",
         msg2 = Message(about, text="Credits:\n-HackMew for his thumb.bat file \
 which the compiling feature is based upon.\n-What is Second Life ? for posting the very simple text editor, \
 that became the basis of this program, on his blog.\n-Bryan Oakley for his extremely detailed example of how \
-to add line numbers and whose code I merged with mine.", width=400, pady=5)
+to add line numbers and whose code I merged with mine.\n-Zachary Voase for his base converter library that \
+made that feature so much easier.", width=400, pady=5)
         msg2.pack()
         
         button = Button(about, text="Close", pady=5, command=about.destroy, width=12)
